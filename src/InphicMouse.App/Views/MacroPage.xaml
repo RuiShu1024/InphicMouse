@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="InphicMouse.App.Views.MacroPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InphicMouse.App.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="28" RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Text="快捷指令编辑器（宏）" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,16"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <Grid ColumnDefinitions="260,*,320" ColumnSpacing="20">
+
+                <!-- 宏列表 -->
+                <StackPanel Grid.Column="0" Spacing="8">
+                    <TextBlock Text="快捷指令列表" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                            CornerRadius="6" Height="320">
+                        <ListView x:Name="MacroList" ItemsSource="{x:Bind Vm.Macros}"
+                                  SelectedItem="{x:Bind Vm.Current, Mode=TwoWay}"
+                                  SelectionMode="Single">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MacroDef">
+                                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" Padding="4,6" TextTrimming="CharacterEllipsis"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Border>
+                    <Grid ColumnSpacing="8" ColumnDefinitions="*,*,*">
+                        <Button Grid.Column="0" Content="新建" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.NewMacroCommand}"/>
+                        <Button Grid.Column="1" Content="删除" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.DeleteMacroCommand}"/>
+                        <Button Grid.Column="2" Content="保存" HorizontalAlignment="Stretch"
+                                Style="{StaticResource AccentButtonStyle}" Command="{x:Bind Vm.SaveCommand}"/>
+                    </Grid>
+                    <Grid ColumnSpacing="8" ColumnDefinitions="*,*">
+                        <Button Grid.Column="0" Content="导出此宏…" HorizontalAlignment="Stretch" Click="ExportMacros_Click"/>
+                        <Button Grid.Column="1" Content="导入宏…" HorizontalAlignment="Stretch" Click="ImportMacros_Click"/>
+                    </Grid>
+                    <TextBlock Text="可拖动列表项排序 · 双击改名" Opacity="0.5" FontSize="12"/>
+                </StackPanel>
+
+                <!-- 事件列表（可拖动排序 / ▲▼） -->
+                <StackPanel Grid.Column="1" Spacing="8">
+                    <TextBlock Text="事件列表" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                            CornerRadius="6" Height="320">
+                        <ListView x:Name="EventList" ItemsSource="{x:Bind Vm.Events, Mode=OneWay}"
+                                  SelectedIndex="{x:Bind Vm.SelectedEventIndex, Mode=TwoWay}"
+                                  SelectionMode="Single">
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection>
+                                    <AddDeleteThemeTransition/>
+                                </TransitionCollection>
+                            </ListView.ItemContainerTransitions>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MacroEventRow">
+                                    <Grid ColumnDefinitions="20,32,64,*" Padding="2,2" Background="Transparent">
+                                        <TextBlock Grid.Column="0" Text="&#x2261;" Opacity="0.5" IsHitTestVisible="False"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   ToolTipService.ToolTip="拖动此行可上下排序"/>
+                                        <TextBlock Grid.Column="1" Text="{x:Bind Index, Mode=OneWay}" Opacity="0.6"/>
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Kind, Mode=OneWay}" Opacity="0.8"/>
+                                        <TextBlock Grid.Column="3" Text="{x:Bind Value, Mode=OneWay}" FontFamily="Consolas"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Border>
+                    <Grid ColumnSpacing="8" ColumnDefinitions="Auto,Auto,*">
+                        <Button Grid.Column="0" Content="▲ 上移" Click="MoveUp_Click"/>
+                        <Button Grid.Column="1" Content="▼ 下移" Click="MoveDown_Click"/>
+                        <TextBlock Grid.Column="2" Text="可拖动行排序，或选中后 ▲▼" Opacity="0.5"
+                                   VerticalAlignment="Center" Margin="6,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- 录制 / 插入 / 延时 / 循环 -->
+                <StackPanel Grid.Column="2" Spacing="10">
+                    <TextBlock Text="录制 / 捕获" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <TextBox x:Name="Capture" IsReadOnly="True" Height="72"
+                             Text="先点此聚焦；录制中在此按键盘/鼠标会被记录"
+                             TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Center"
+                             PreviewKeyDown="Capture_KeyDown"
+                             PointerPressed="Capture_PointerPressed" PointerReleased="Capture_PointerReleased"/>
+
+                    <Grid ColumnSpacing="8" ColumnDefinitions="*,*,*">
+                        <Button Grid.Column="0" Content="开始/停止录制" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.ToggleRecordCommand}"/>
+                        <Button Grid.Column="1" Content="清空" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.ClearCommand}"/>
+                        <Button Grid.Column="2" Content="删除所选" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.DeleteSelectedCommand}"/>
+                    </Grid>
+
+                    <TextBlock Text="插入事件" Opacity="0.7" Margin="0,4,0,0"/>
+                    <Grid ColumnSpacing="8" ColumnDefinitions="*,*,*">
+                        <Button Grid.Column="0" Content="左键" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.InsertLeftCommand}"/>
+                        <Button Grid.Column="1" Content="中键" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.InsertMiddleCommand}"/>
+                        <Button Grid.Column="2" Content="右键" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.InsertRightCommand}"/>
+                    </Grid>
+                    <Grid ColumnSpacing="8" ColumnDefinitions="*,*">
+                        <Button Grid.Column="0" x:Name="InsertKbBtn" Content="键盘事件" HorizontalAlignment="Stretch"
+                                ToolTipService.ToolTip="点此后再按一个键，插入 按下/松开 一对事件" Click="InsertKb_Click"/>
+                        <Button Grid.Column="1" Content="时间延迟" HorizontalAlignment="Stretch"
+                                Command="{x:Bind Vm.InsertDelayCommand}"/>
+                    </Grid>
+
+                    <TextBlock Text="{x:Bind Vm.Status, Mode=OneWay}" Opacity="0.7"
+                               TextWrapping="Wrap" Margin="0,4,0,0"/>
+
+                    <TextBlock Text="延时设置" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,6,0,0"/>
+                    <RadioButton Content="录制延时" GroupName="delay"
+                                 IsChecked="{x:Bind Vm.UseRecordedDelay, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <RadioButton Content="统一延时" GroupName="delay"
+                                     IsChecked="{x:Bind Vm.UseUniformDelay, Mode=TwoWay}"/>
+                        <NumberBox Value="{x:Bind Vm.UniformDelayMs, Mode=TwoWay}" Minimum="0" Maximum="65535"
+                                   SpinButtonPlacementMode="Compact" Width="120"/>
+                    </StackPanel>
+
+                    <TextBlock Text="循环设置" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,6,0,0"/>
+                    <RadioButton Content="循环直到按键松开" GroupName="loop"
+                                 IsChecked="{x:Bind Vm.IsUntilRelease, Mode=TwoWay}"/>
+                    <RadioButton Content="循环直到任意键按下" GroupName="loop"
+                                 IsChecked="{x:Bind Vm.IsUntilAnyKey, Mode=TwoWay}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <RadioButton Content="循环次数" GroupName="loop"
+                                     IsChecked="{x:Bind Vm.IsCount, Mode=TwoWay}"/>
+                        <NumberBox Value="{x:Bind Vm.LoopCount, Mode=TwoWay}" Minimum="1" Maximum="255"
+                                   SpinButtonPlacementMode="Compact" Width="100"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

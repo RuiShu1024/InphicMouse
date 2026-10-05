@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>InphicMouse.Probe</RootNamespace>
+    <AssemblyName>InphicMouse.Probe</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\InphicMouse.Hid\InphicMouse.Hid.csproj" />
+    <ProjectReference Include="..\..\src\InphicMouse.Protocol\InphicMouse.Protocol.csproj" />
+  </ItemGroup>
+</Project>

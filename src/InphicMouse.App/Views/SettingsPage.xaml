@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="InphicMouse.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="28">
+        <StackPanel Spacing="16" MaxWidth="520" HorizontalAlignment="Left">
+            <TextBlock Text="设置" Style="{StaticResource TitleTextBlockStyle}"/>
+
+            <TextBlock Text="外观" Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <RadioButton Content="跟随系统" GroupName="theme" IsChecked="{x:Bind Vm.IsThemeSystem, Mode=TwoWay}"/>
+                <RadioButton Content="亮色" GroupName="theme" IsChecked="{x:Bind Vm.IsThemeLight, Mode=TwoWay}"/>
+                <RadioButton Content="暗色" GroupName="theme" IsChecked="{x:Bind Vm.IsThemeDark, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <TextBlock Text="鼠标设置（需点「应用」下发到鼠标）" Style="{StaticResource SubtitleTextBlockStyle}"
+                       Margin="0,8,0,0"/>
+            <NumberBox Header="休眠时间（分钟，0=不休眠）" Value="{x:Bind Vm.SleepMinutes, Mode=TwoWay}"
+                       SpinButtonPlacementMode="Compact" Minimum="0" Maximum="60"/>
+            <ToggleSwitch Header="移动唤醒" IsOn="{x:Bind Vm.MoveWakeup, Mode=TwoWay}"/>
+            <ToggleSwitch Header="移动时关灯" IsOn="{x:Bind Vm.MoveCloseLight, Mode=TwoWay}"/>
+            <NumberBox Header="按键响应时间" Value="{x:Bind Vm.ButtonRespondTime, Mode=TwoWay}"
+                       SpinButtonPlacementMode="Compact" Minimum="0" Maximum="255"/>
+            <NumberBox Header="抬升高度" Value="{x:Bind Vm.LiftoffHeight, Mode=TwoWay}"
+                       SpinButtonPlacementMode="Compact" Minimum="0" Maximum="10"/>
+
+            <Button Content="应用" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind Vm.ApplyCommand}"/>
+            <TextBlock Text="{x:Bind Vm.Status, Mode=OneWay}" Opacity="0.7"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

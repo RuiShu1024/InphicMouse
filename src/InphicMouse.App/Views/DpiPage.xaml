@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="InphicMouse.App.Views.DpiPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:InphicMouse.App.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="28">
+        <StackPanel Spacing="16" MaxWidth="640" HorizontalAlignment="Left">
+            <TextBlock Text="DPI 档位" Style="{StaticResource TitleTextBlockStyle}"/>
+            <TextBlock Text="设置档位数（1-6）、各档 DPI 值与指示灯颜色，并选择当前档。" Opacity="0.7"
+                       TextWrapping="Wrap"/>
+
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <TextBlock Text="档位数" VerticalAlignment="Center"/>
+                <NumberBox Value="{x:Bind Vm.StageCount, Mode=TwoWay}" Minimum="1" Maximum="6"
+                           SpinButtonPlacementMode="Compact" Width="140"/>
+                <TextBlock Text="（设为 1 时只保留 DPI 1，其余档隐藏）" Opacity="0.6" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <ItemsControl ItemsSource="{x:Bind Vm.Stages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:DpiStageItem">
+                        <Grid ColumnDefinitions="80,*,Auto" ColumnSpacing="12" Margin="0,6"
+                              VerticalAlignment="Center"
+                              Visibility="{x:Bind RowVisibility, Mode=OneWay}">
+                            <TextBlock Grid.Column="0" Text="{x:Bind Label}" VerticalAlignment="Center"/>
+                            <NumberBox Grid.Column="1" Value="{x:Bind Value, Mode=TwoWay}"
+                                       SpinButtonPlacementMode="Compact" Minimum="50" Maximum="26000"
+                                       SmallChange="50" LargeChange="400"/>
+                            <Button Grid.Column="2" Padding="6" ToolTipService.ToolTip="{x:Bind ColorHex, Mode=OneWay}">
+                                <Border Width="40" Height="20" CornerRadius="3"
+                                        Background="{x:Bind ColorBrush, Mode=OneWay}"
+                                        BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <ColorPicker Color="{x:Bind PickerColor, Mode=TwoWay}"
+                                                     ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                                                     IsHexInputVisible="True" IsColorChannelTextInputVisible="True"/>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <TextBlock Text="当前档" VerticalAlignment="Center"/>
+                <ComboBox ItemsSource="{x:Bind Vm.ActiveStages}" SelectedIndex="{x:Bind Vm.CurrentIndex, Mode=TwoWay}"
+                          DisplayMemberPath="Label" MinWidth="120"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Content="应用" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind Vm.ApplyCommand}"/>
+                <Button Content="恢复默认" Command="{x:Bind Vm.ResetCommand}"/>
+            </StackPanel>
+            <TextBlock Text="{x:Bind Vm.Status, Mode=OneWay}" Opacity="0.7"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

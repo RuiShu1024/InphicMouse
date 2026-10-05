@@ -1,0 +1,16 @@
+# ---- 构建产物 ----
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+
+# ---- 打包产物（体积大，改走 GitHub Releases 发布）----
+artifacts/
+*.CAB
+*.cab
+
+# ---- 本地/临时 ----
+*.log
+*.tmp
+_scratch/
