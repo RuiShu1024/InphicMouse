@@ -32,8 +32,12 @@ $gh = (Get-Command gh.exe -ErrorAction SilentlyContinue).Source
 if (-not $gh) { $gh = "C:\Program Files\GitHub CLI\gh.exe" }
 if (-not (Test-Path $gh)) { throw "未找到 GitHub CLI(gh)。请先安装: winget install --id GitHub.cli -e" }
 
-& $gh auth status 2>&1 | Out-Null
-if ($LASTEXITCODE -ne 0) { throw "尚未登录 GitHub。请先运行:  `"$gh`" auth login" }
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+& $gh auth status *> $null
+$authOk = ($LASTEXITCODE -eq 0)
+$ErrorActionPreference = $prevEap
+if (-not $authOk) { throw "尚未登录 GitHub。请先运行:  `"$gh`" auth login" }
 
 # ---- 产物 ----
 if ($Build -or -not (Test-Path $msi) -or -not (Test-Path $zip)) {
@@ -81,9 +85,12 @@ $notesText = @"
 Write-Host "[2/4] 检查远程仓库…"
 Push-Location $root
 try {
-    $exists = $true
-    & $gh repo view $Repo 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { $exists = $false }
+    # 注意：PowerShell 5.1 下原生命令写 stderr 会触发 NativeCommandError，这里临时放宽
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & $gh repo view $Repo *> $null
+    $exists = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = $prevEap
 
     if (-not $exists) {
         Write-Host "      创建仓库 $Repo …"
@@ -106,8 +113,12 @@ try {
     # ---- Release ----
     Write-Host "[3/4] 创建 Release $Tag …"
     $asset1 = $msi; $asset2 = $zip
-    & $gh release view $Tag 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) {
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & $gh release view $Tag *> $null
+    $relExists = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = $prevEap
+    if ($relExists) {
         Write-Host "      Release 已存在，追加/覆盖附件…"
         & $gh release upload $Tag $asset1 $asset2 --clobber
     } else {
