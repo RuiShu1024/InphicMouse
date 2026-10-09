@@ -178,3 +178,6 @@ powershell -ExecutionPolicy Bypass -File scripts\build-installer.ps1
 - 协议还原文档：`docs/hid-protocol.md`（含各命令字节布局与逆向依据）。
 - 官方配置数据库样本：`mouse_in9(3311)_data1.db`（SQLite，含灯光/宏/DPI 实际存储）。
 - 校准方法：用 Wireshark + USBPcap 抓原厂软件的下发报文，对照 `MacroCodec` / 各 Codec 逐字节比对。
+
+## 社区
+感谢 [LINUX DO](https://linux.do) 社区提供开放、友善的技术交流平台
